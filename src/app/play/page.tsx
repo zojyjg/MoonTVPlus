@@ -1347,21 +1347,26 @@ function PlayPageClient() {
         requestHeaders.Referer = `${window.location.origin}/`;
       }
 
-      const response = await fetch(`${LOCAL_TRANSCODER_BASE_URL}/v1/sessions`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          url: sourceUrl,
-          headers: Object.keys(requestHeaders).length > 0 ? requestHeaders : undefined,
-          subtitle: {
-            mode: 'burn_embedded',
-            stream: 'auto',
+      let response: Response;
+      try {
+        response = await fetch(`${LOCAL_TRANSCODER_BASE_URL}/v1/sessions`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
           },
-          refresh: false,
-        }),
-      });
+          body: JSON.stringify({
+            url: sourceUrl,
+            headers: Object.keys(requestHeaders).length > 0 ? requestHeaders : undefined,
+            subtitle: {
+              mode: 'burn_embedded',
+              stream: 'auto',
+            },
+            refresh: false,
+          }),
+        });
+      } catch {
+        throw new Error('转码服务连接失败');
+      }
 
       const data = await response.json().catch(() => null);
       if (!response.ok) {
